@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0A92CA6F-F4FB-480D-AD93-2EA2AF36DB00}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MultiPlug.Ext.FileIO</RootNamespace>
+    <AssemblyName>MultiPlug.Ext.FileIO</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="MultiPlug.Base, Version=1.0.71.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MultiPlug.Base.1.0.71\lib\net472\MultiPlug.Base.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MultiPlug.Extension.Core, Version=1.0.64.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MultiPlug.Extension.Core.1.0.64\lib\net472\MultiPlug.Extension.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Components\FileReader\FileReaderComponent.cs" />
+    <Compile Include="Components\FileWriter\FileWriterComponent.cs" />
+    <Compile Include="Components\Utils\ChangeManager.cs" />
+    <Compile Include="Components\Utils\CReverseLineReader.cs" />
+    <Compile Include="Controllers\API\APIApp.cs" />
+    <Compile Include="Controllers\API\DirectoryController.cs" />
+    <Compile Include="Controllers\API\FileController.cs" />
+    <Compile Include="Controllers\Apps\CStatusView.cs" />
+    <Compile Include="Controllers\Apps\GetHome.cs" />
+    <Compile Include="Controllers\Assets\AssetsHandler.cs" />
+    <Compile Include="Controllers\Assets\ImageController.cs" />
+    <Compile Include="Controllers\Settings\Home\HomeController.cs" />
+    <Compile Include="Controllers\Settings\Reader\ReaderController.cs" />
+    <Compile Include="Controllers\Settings\Reader\ReaderDeleteController.cs" />
+    <Compile Include="Controllers\Settings\Reader\ReaderPathController.cs" />
+    <Compile Include="Controllers\Settings\SettingsApp.cs" />
+    <Compile Include="Controllers\Settings\Writer\WriterController.cs" />
+    <Compile Include="Controllers\Settings\Writer\WriterDeleteController.cs" />
+    <Compile Include="Controllers\Settings\Writer\WriterPathController.cs" />
+    <Compile Include="Core.cs" />
+    <Compile Include="FileIO.cs" />
+    <Compile Include="Models\FileReaderSettings.cs" />
+    <Compile Include="Models\FileWriterSettings.cs" />
+    <Compile Include="Models\Load\FileReader.cs" />
+    <Compile Include="Models\Load\FileWriter.cs" />
+    <Compile Include="Models\Load\Root.cs" />
+    <Compile Include="Models\SettingsModel.cs" />
+    <Compile Include="Models\Settings\Files.cs" />
+    <Compile Include="Models\Settings\Path.cs" />
+    <Compile Include="Models\Settings\ReaderGet.cs" />
+    <Compile Include="Models\Settings\ReaderPost.cs" />
+    <Compile Include="Models\ViewModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Controllers\Settings\Home\Home.cshtml" />
+    <None Include="Controllers\Apps\index.cshtml" />
+    <None Include="Controllers\Settings\Path\Path.cshtml" />
+    <None Include="Controllers\Settings\Reader\Reader.cshtml" />
+    <None Include="Controllers\Settings\Writer\Writer.cshtml" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Controllers\Assets\file.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

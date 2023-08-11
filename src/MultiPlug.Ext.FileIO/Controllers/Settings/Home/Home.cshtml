@@ -1,0 +1,94 @@
+﻿@model MultiPlug.Base.Http.EdgeApp
+
+<section class="row-fluid">
+
+    <div class="row-fluid">
+        <div class="box">
+            <div class="span5">
+                <a href="/"><img alt="Files Logo" src="@Raw(Model.Context.Paths.Assets)images/files.png"></a>
+            </div>
+            <div class="span2">
+                <p style="font-size:22.75px; padding-top:10px;">Files</p>
+            </div>
+            <div class="span5">
+            </div>
+        </div>
+    </div>
+
+    <div class="row-fluid">
+        <div class="span6">
+            <div class="box non-collapsible">
+                <div class="row-fluid">
+                    <div class="span11"><h3>Readers</h3></div>
+                    <div class="span1"><a class="btn btn-green" href="@Raw(Model.Context.Paths.Home)reader/"><i class="icon-plus"></i></a></div>
+                </div>
+
+                <div class="row-fluid">
+                    <div class="span1">
+                    </div>
+                    <div class="span9">
+                        <p>Path</p>
+                    </div>
+                    <div class="span1">
+                    </div>
+                    <div class="span1">
+                    </div>
+                </div>
+
+                @foreach (var Reader in @Model.Extension.Model.FileReaders)
+                {
+                <div class="row-fluid">
+                    <div class="span1">
+                        <i class="icon-file-alt"></i>
+                    </div>
+                    <div class="span9">
+                        <a href="@Raw(Model.Context.Paths.Home)reader/?id=@Reader.Settings.Guid">@Reader.Settings.FilePath</a>
+                    </div>
+                    <div class="span2">
+                        <div class="btn-group">
+                            <a class="btn btn-orange" href="@Raw(Model.Context.Paths.Home)reader/?id=@Reader.Settings.Guid"><i class="icon-edit"></i></a>
+                            <a class="btn btn-red" href="@Raw(Model.Context.Paths.Home)reader/delete/?id=@Reader.Settings.Guid"><i class="icon-trash"></i></a>
+                        </div>
+                    </div>
+                </div>
+                }
+
+            </div>
+        </div>
+        <div class="span6">
+
+            <div class="box non-collapsible">
+                <div class="row-fluid">
+                    <div class="span12"><h3>Writers</h3></div>
+                </div>
+
+                <div class="row-fluid">
+                    <div class="span11">
+                        <p>File Path</p>
+                    </div>
+                    <div class="span1">
+                        <a href="@Raw(Model.Context.Paths.Home)writer/">New</a>
+                    </div>
+                </div>
+
+                @foreach (var Writer in @Model.Extension.Model.FileWriters)
+                {
+                <div class="row-fluid">
+                    <div class="span10">
+                        <a href="@Raw(Model.Context.Paths.Home)writer/?id=@Writer.Settings.Guid">@Writer.Settings.FilePath</a>
+                    </div>
+                    <div class="span1">
+                        <a href="@Raw(Model.Context.Paths.Home)writer/?id=@Writer.Settings.Guid">Edit</a>
+                    </div>
+                    <div class="span1">
+                        <a href="@Raw(Model.Context.Paths.Home)writer/delete/?id=@Writer.Settings.Guid">Delete</a>
+                    </div>
+                </div>
+                }
+
+            </div>
+
+        </div>
+    </div>
+</section>
+

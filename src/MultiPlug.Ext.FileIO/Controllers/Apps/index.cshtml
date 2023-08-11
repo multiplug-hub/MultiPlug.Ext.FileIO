@@ -1,0 +1,65 @@
+﻿@model MultiPlug.Base.Http.EdgeApp
+
+<style>
+    a, a:active, a:visited {
+        color: red;
+    }
+</style>
+
+<h3 class="box-header">
+    File monitors
+</h3>
+<form class="form-horizontal" action="" method="post" accept-charset="utf-8" enctype="application/x-www-form-urlencoded">
+
+    <ul id="files" style="list-style: none;">
+    @foreach (var x in @Model.Extension.Model.Files)
+    {
+        <li>
+            <div class="box">
+
+                <div class="row-fluid">
+
+                    <div class="control-group">
+                        <label class="control-label" for="inputEmail">File Location</label>
+                        <div class="controls">
+                            <input type="hidden" name="Guid" value="@x.Guid">
+                            <input type="text" name="FilePath" class="input-xxlarge" id="Param_NodeId" placeholder="c:/" value="@x.FilePath">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="inputPassword">Event Id</label>
+                        <div class="controls">
+                            <input name="EventId" class="input-xxlarge" type="text" id="Param_EventId" placeholder="00000000-0000-0000-0000-000000000000" value="@x.EventId">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="controls">
+                            <button type="button" class="item btn btn-red">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>
+    }
+    </ul>
+    <div class="form-actions">
+        <button type="button" id="AddNewFile" class="btn btn-green">Add file</button>
+        <button type="submit" value="submit" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn">Cancel</button>
+    </div>
+</form> 
+
+<script>
+    var foodList = [];
+
+    var newFileElement = "<li><div class=\"box\"><div class=\"row-fluid\"><div class=\"control-group\"><label class=\"control-label\" for=\"inputEmail\">File Location</label><div class=\"controls\"><input type=\"hidden\" name=\"Guid\" value=\"\"><input name=\"FilePath\" class=\"input-xxlarge\" type=\"text\" id=\"Param_FilePath\" placeholder=\"c:/\" value=\"\"></div></div><div class=\"control-group\"><label class=\"control-label\" for=\"inputPassword\">Event Id</label><div class=\"controls\"><input name=\"EventId\" class=\"input-xxlarge\" type=\"text\" id=\"Param_ServerUrl\" placeholder=\"00000000-0000-0000-0000-000000000000\" value=\"12312414345433\"></div></div><div class=\"control-group\"><div class=\"controls\"><button type=\"button\" class=\"item btn btn-red\">Delete</button></div></div></div></div></li>";
+
+    $(function(){
+        $('#AddNewFile').on('click', function () {
+            $('#files').append(newFileElement);
+        });
+        $(document).on('click', '.item', function () {
+            $(this).parent().parent().parent().parent().parent().remove();
+        });
+    });
+</script>

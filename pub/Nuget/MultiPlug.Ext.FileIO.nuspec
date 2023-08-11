@@ -1,0 +1,40 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>MultiPlug.Ext.FileIO</id>
+    <version>1.0.13</version>
+    <title>File I/O Extension for the MultiPlug .Net Edge Computing Platform</title>
+    <authors>MultiPlugHub</authors>
+    <owners>MultiPlugHub</owners>
+    <projectUrl>https://github.com/multiplug-hub/MultiPlug.Ext.FileIO</projectUrl>
+    <icon>images\multiplugico.png</icon>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>File Read and Write Extension for the MultiPlug .Net Edge Computing Platform</description>
+    <license type="expression">MIT</license>
+    <repository type="git" url="https://github.com/multiplug-hub/MultiPlug.Ext.FileIO" />
+    <releaseNotes>Application Use:
+* Monitor file changes and read complete or partial files lines, on change or event subscription.
+
+Change Log:
+1.0.13 Upgrade for MultiPlug.Core 2.2.81
+1.0.12 Upgrade for MultiPlug.Core 2.2.68
+1.0.10 Refector: Rename project from files to fileio
+1.0.9 Bug: Namespace conflicts
+1.0.8 Enhancement: Applied latest base classes
+1.0.4 Enhancement: Added: File navigation and selection.
+    </releaseNotes>
+    <copyright>MultiPlug Community</copyright>
+    <tags>MultiPlug Edge_Computing Edge IoT File Files No-Code Low-Code Low-Code/No-Code</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework4.7.2">
+        <dependency id="MultiPlug.Base" version="1.0.71" />
+        <dependency id="MultiPlug.Extension.Core" version="1.0.64" />
+        <dependency id="MultiPlug.Core" version="2.2.81" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="images\multiplugico.png" target="images\" />
+    <file src="..\..\src\MultiPlug.Ext.FileIO\bin\Release\MultiPlug.Ext.FileIO.dll" target="lib\net472" />
+  </files>
+</package>
