@@ -94,12 +94,15 @@ namespace MultiPlug.Ext.FileIO
                 if (file != null)
                 {
                     file.Stop();
-                    file.Apply(item);
+                    file.UpdateProperties(item);
                     file.Start();
                 }
                 else
                 {
-                    var NewReader = new FileReaderComponent(item);
+                    var NewReader = new FileReaderComponent(item.Guid);
+                    NewReader.UpdateProperties(item);
+
+
                     Changes.Add(NewReader);
                     FileReaders.Add(NewReader);
                     NewReader.Start();
@@ -116,11 +119,12 @@ namespace MultiPlug.Ext.FileIO
                 if (file != null)
                 {
 
-                    file.Apply(item);
+                    file.UpdateProperties(item);
                 }
                 else
                 {
-                    var NewWriter = new FileWriterComponent(item);
+                    var NewWriter = new FileWriterComponent(item.Guid);
+                    NewWriter.UpdateProperties(item);
                     Changes.Add(NewWriter);
                     FileWriters.Add(NewWriter);
                 }

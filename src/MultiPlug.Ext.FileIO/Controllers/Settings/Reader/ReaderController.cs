@@ -21,36 +21,25 @@ namespace MultiPlug.Ext.FileIO.Controllers.Settings.Reader
                 Reader = Core.Instance.FileReaders.Find(t => t.Settings.Guid == theModel.Id);
             }
 
-            FileReaderSettings model;
+            FileReaderSettings ResponseModel;
 
             if (Reader != null)
             {
-                model = Reader.Settings;
-
-                if( ! string.IsNullOrEmpty( theModel.Path ) )
-                {
-                    model.FilePath = theModel.Path;
-                }
+                ResponseModel = Reader.Settings;
             }
             else
             {
-                model = new FileReaderSettings
-                {
-                    Guid = Guid.NewGuid().ToString(),
-                    FilePath = string.IsNullOrEmpty(theModel.Path)? "C:\\" : theModel.Path,
-                    FileChanged = new Event { Guid = Guid.NewGuid().ToString(), Description = "File Changed Event", Id = Guid.NewGuid().ToString() },
-                    nFDN = true,
-                    nFFN = true,
-                    nFLA = true,
-                    nFLW = true,
-                    ReadSubscriptions = new Subscription[0],
-                    Subject = "value"
-                };
+                ResponseModel = new FileReaderComponent(Guid.NewGuid().ToString()).Settings;
+            }
+
+            if (!string.IsNullOrEmpty(theModel.Path))
+            {
+                ResponseModel.FilePath = theModel.Path;
             }
 
             return new Response
             {
-                Model = model,
+                Model = ResponseModel,
                 Template = "GetReaderViewContents"
             };
         }
@@ -77,15 +66,13 @@ namespace MultiPlug.Ext.FileIO.Controllers.Settings.Reader
             {
                 ReadSubscriptions = Subscriptions,
                 Guid = theModel.guid,
-                FilePath = theModel.path,
+                FilePath = theModel.FilePath,
                 nFLA = theModel.nfla,
                 nFLW = theModel.nflw,
                 nFFN = theModel.nffn,
                 nFDN = theModel.nfdn,
                 UpdatePart = ( theModel.readaction == "full" )? 0 : theModel.updatepart,
-                FileChanged = new Event {Guid = theModel.guid, Id = theModel.eventid, Description = theModel.eventdescription },
-                Subject = theModel.subject
-
+                FileChanged = new Event {Guid = theModel.guid, Id = theModel.EventId, Description = theModel.EventDescription, Subjects = new string[] { theModel.EventSubject } }       
             } });
 
             return new Response { StatusCode = System.Net.HttpStatusCode.Moved, Location = new Uri(Context.Referrer, "?id=" + theModel.guid) };

@@ -1,6 +1,5 @@
 ﻿using MultiPlug.Base;
 using MultiPlug.Base.Exchange;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace MultiPlug.Ext.FileIO.Models
@@ -12,15 +11,16 @@ namespace MultiPlug.Ext.FileIO.Models
         [DataMember]
         public string FilePath { get; set; }
         [DataMember]
-        public List<Subscription> WriteSubscriptions { get; set; }
+        public Subscription[] WriteSubscriptions { get; set; }
         [DataMember]
-        public bool Append { get; set; }
+        public bool? Append { get; set; }
         [DataMember]
-        public bool WriteLine { get; set; }
+        public bool? WriteLine { get; set; }
         [DataMember]
-        public string GroupSelectKey { get; set; }
-        public string OverwriteEnabled { get { return !Append ? "checked" : ""; } }
-        public string AppendEnabled { get { return Append ? "checked" : ""; } }
-        public string WriteLineEnabled { get { return WriteLine ? "checked" : ""; } }
+        public string WritePrefix { get; set; }
+        [DataMember]
+        public string WriteSeparator { get; set; }
+        [DataMember]
+        public string WriteSuffix { get; set; }
     }
 }

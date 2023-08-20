@@ -25,12 +25,12 @@ namespace MultiPlug.Ext.FileIO
             Core.Instance.Changes.SubscriptionsUpdated += Changes_SubscriptionsUpdated;
         }
 
-        private void Changes_SubscriptionsUpdated(object sender, EventArgs e)
+        private void Changes_SubscriptionsUpdated()
         {
             MultiPlugActions.Extension.Updates.Subscriptions();
         }
 
-        private void Changes_EventsUpdated(object sender, EventArgs e)
+        private void Changes_EventsUpdated()
         {
             MultiPlugActions.Extension.Updates.Events();
         }

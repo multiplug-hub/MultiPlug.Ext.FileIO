@@ -7,16 +7,20 @@ namespace MultiPlug.Ext.FileIO.Controllers.Settings.Reader
     [Route("reader/delete")]
     public class ReaderDeleteController : SettingsApp
     {
-        public Response Get()
+        public Response Get(string id)
         {
-            var dic = Context.QueryString.First(q => q.Key == "id");
+            if(!string.IsNullOrEmpty(id))
+            {
+                var FileReader = Core.Instance.FileReaders.FirstOrDefault(t => t.Settings.Guid == id);
 
-            var reader = Core.Instance.FileReaders.Find(t => t.Settings.Guid == dic.Value);
-
-            Core.Instance.Changes.EnabledUpdates(false);
-            Core.Instance.Changes.Remove(reader);
-            Core.Instance.FileReaders.Remove(reader);
-            Core.Instance.Changes.EnabledUpdates(true);
+                if(FileReader != null)
+                {
+                    Core.Instance.Changes.EnabledUpdates(false);
+                    Core.Instance.Changes.Remove(FileReader);
+                    Core.Instance.FileReaders.Remove(FileReader);
+                    Core.Instance.Changes.EnabledUpdates(true);
+                }
+            }
 
             return new Response
             {

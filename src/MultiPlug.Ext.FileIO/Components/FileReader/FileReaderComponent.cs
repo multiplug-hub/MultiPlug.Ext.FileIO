@@ -5,26 +5,21 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
-using MultiPlug.Ext.FileIO.Models;
 using MultiPlug.Base;
 using MultiPlug.Base.Exchange;
-
+using MultiPlug.Ext.FileIO.Models;
 using MultiPlug.Ext.FileIO.Components.Utils;
 
 namespace MultiPlug.Ext.FileIO.Components.FileReader
 {
     public class FileReaderComponent : MultiPlugBase
     {
-        public event EventHandler EventUpdated;
-        public event EventHandler SubscriptionsUpdated;
+        public event Action EventUpdated;
+        public event Action SubscriptionsUpdated;
 
-        private FileReaderSettings m_Settings = new FileReaderSettings { Guid = System.Guid.NewGuid().ToString() };
+        private FileReaderSettings m_Settings;
 
         private FileSystemWatcher FSW = new FileSystemWatcher();
-
-        private SubscriptionsHandler m_SubscriptionsHandler;
-        private EventsHandler m_EventHandlers;
-
         private DateTime m_LastWriteTime = DateTime.MinValue;
 
         [DataMember]
@@ -36,148 +31,139 @@ namespace MultiPlug.Ext.FileIO.Components.FileReader
             }
         }
 
-        public FileReaderComponent() : this(new FileReaderSettings
+        public FileReaderComponent(string theGuid)
         {
-            Guid = System.Guid.NewGuid().ToString(),
-            FilePath = "",
-            FileChanged = new Event { Guid = System.Guid.NewGuid().ToString(), Id = System.Guid.NewGuid().ToString(), Description = "" },
-            ReadSubscriptions = new Subscription[0],
-            nFDN = true,
-            nFFN = true,
-            nFLA = true,
-            nFLW = true,
-            Subject = "update"
-        })
-        { }
+            m_Settings = new FileReaderSettings
+            {
+                Guid = theGuid,
+                FilePath = Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory),
+                FileChanged = new Event { Guid = theGuid, Id = System.Guid.NewGuid().ToString(), Description = "", Subjects = new string[] { "update" }, Group = "File Reader" },
+                ReadSubscriptions = new Subscription[0],
+                nFDN = true,
+                nFFN = true,
+                nFLA = true,
+                nFLW = true,
+                UpdatePart = 0
+            };
 
-        public FileReaderComponent(FileReaderSettings theSettings)
-        {
-            m_Settings = theSettings;
-
-            m_EventHandlers = new EventsHandler(m_Settings);
-            m_SubscriptionsHandler = new SubscriptionsHandler(m_Settings, m_EventHandlers);
-
-
-            m_Settings.FileChanged.Object = m_EventHandlers;
-
-            if(m_Settings.ReadSubscriptions == null) // Platform should prevent this, but it isn't! TODO.
+            if (m_Settings.ReadSubscriptions == null) // Platform should prevent this, but it isn't! TODO.
             {
                 m_Settings.ReadSubscriptions = new Subscription[0];
             }
 
-            foreach( var ReadSubscription in m_Settings.ReadSubscriptions)
+            foreach (var ReadSubscription in m_Settings.ReadSubscriptions)
             {
-                ReadSubscription.EventConsumer = m_SubscriptionsHandler;
+                ReadSubscription.Event += OnReadSubscriptionEvent;
                 ReadSubscription.Guid = Guid.NewGuid().ToString();
             }
 
             ConfigureWatcher();
         }
 
-        internal void Apply(Models.Settings.Path theNewSettings)
+        private void OnReadSubscriptionEvent(SubscriptionEvent obj)
         {
-            if (theNewSettings.Guid != m_Settings.Guid)
-            {
-                return;
-            }
-
-            if (m_Settings.FilePath != theNewSettings.FilePath)
-            {
-                m_Settings.FilePath = theNewSettings.FilePath;
-                ConfigureWatcher();
-            }
+            m_Settings.FileChanged.Invoke(new Payload(m_Settings.FileChanged.Id, new PayloadSubject[] { new PayloadSubject(m_Settings.FileChanged.Subjects[0], FileHandler.ReadFileContent(m_Settings.FilePath, m_Settings.UpdatePart.Value)) }));
         }
 
-        internal void Apply(FileReaderSettings theNewSettings)
+        internal void UpdateProperties(FileReaderSettings theProperties)
         {
             bool ReConfigure = false;
             bool EvUpdated = false;
             bool SuUpdated = false;
 
-            if (theNewSettings.Guid != m_Settings.Guid)
+            if (theProperties.Guid != m_Settings.Guid)
             {
                 return;
             }
 
-            if (m_Settings.FileChanged.Id != theNewSettings.FileChanged.Id)
+            if (theProperties.FileChanged != null && m_Settings.FileChanged.Id != theProperties.FileChanged.Id)
             {
-                m_Settings.FileChanged.Id = theNewSettings.FileChanged.Id;
+                m_Settings.FileChanged.Id = theProperties.FileChanged.Id;
                 EvUpdated = true;
             }
-            if (m_Settings.FileChanged.Description != theNewSettings.FileChanged.Description)
+            if (theProperties.FileChanged != null && m_Settings.FileChanged.Description != theProperties.FileChanged.Description)
             {
-                m_Settings.FileChanged.Description = theNewSettings.FileChanged.Description;
+                m_Settings.FileChanged.Description = theProperties.FileChanged.Description;
                 EvUpdated = true;
             }
-            if (theNewSettings.FilePath != null && m_Settings.FilePath != theNewSettings.FilePath)
+            if (theProperties.FilePath != null && m_Settings.FilePath != theProperties.FilePath)
             {
-                m_Settings.FilePath = theNewSettings.FilePath;
+                m_Settings.FilePath = theProperties.FilePath;
                 ReConfigure = true;
             }
-            if (m_Settings.UpdatePart != theNewSettings.UpdatePart)
+            if (theProperties.UpdatePart != null && m_Settings.UpdatePart != theProperties.UpdatePart)
             {
-                m_Settings.UpdatePart = theNewSettings.UpdatePart;
+                m_Settings.UpdatePart = theProperties.UpdatePart;
                 ReConfigure = true;
             }
-            if (m_Settings.nFLA != theNewSettings.nFLA)
+            if (theProperties.nFLA != null && m_Settings.nFLA != theProperties.nFLA)
             {
-                m_Settings.nFLA = theNewSettings.nFLA;
+                m_Settings.nFLA = theProperties.nFLA;
                 ReConfigure = true;
             }
-            if (m_Settings.nFLW != theNewSettings.nFLW)
+            if (theProperties.nFLW != null && m_Settings.nFLW != theProperties.nFLW)
             {
-                m_Settings.nFLW = theNewSettings.nFLW;
+                m_Settings.nFLW = theProperties.nFLW;
                 ReConfigure = true;
             }
-            if (m_Settings.nFFN != theNewSettings.nFFN)
+            if (theProperties.nFFN != null && m_Settings.nFFN != theProperties.nFFN)
             {
-                m_Settings.nFFN = theNewSettings.nFFN;
+                m_Settings.nFFN = theProperties.nFFN;
                 ReConfigure = true;
             }
-            if (m_Settings.nFDN != theNewSettings.nFDN)
+            if (theProperties.nFDN != null && m_Settings.nFDN != theProperties.nFDN)
             {
-                m_Settings.nFDN = theNewSettings.nFDN;
+                m_Settings.nFDN = theProperties.nFDN;
                 ReConfigure = true;
-            }
-            if (m_Settings.Subject != theNewSettings.Subject)
-            {
-                m_Settings.Subject = theNewSettings.Subject;
             }
 
-            var EDeleted = m_Settings.ReadSubscriptions.Where(e => Array.Find(theNewSettings.ReadSubscriptions, ne => ne.Guid == e.Guid) == null);
-            if (EDeleted.Count() > 0) { SuUpdated = true; }
-            m_Settings.ReadSubscriptions = m_Settings.ReadSubscriptions.Except(EDeleted).ToArray();
-
-
-            List<Subscription> NewSubscriptionList = new List<Subscription>();
-            foreach( var ReadSubscription in theNewSettings.ReadSubscriptions)
+            if(theProperties.FileChanged != null)
             {
-                Subscription ExistingReadSubscription = Array.Find(m_Settings.ReadSubscriptions, ne => ne.Guid == ReadSubscription.Guid);
-
-                if( ExistingReadSubscription == null )
+                if(Event.Merge(m_Settings.FileChanged, theProperties.FileChanged, true) )
                 {
-                    ReadSubscription.Guid = System.Guid.NewGuid().ToString();
-                    ReadSubscription.EventConsumer = m_SubscriptionsHandler;
-                    NewSubscriptionList.Add(ReadSubscription);
-                    SuUpdated = true;
+                    EvUpdated = true;
                 }
-                else
+            }
+
+            if(theProperties.ReadSubscriptions != null)
+            {
+                var EDeleted = m_Settings.ReadSubscriptions.Where(e => Array.Find(theProperties.ReadSubscriptions, ne => ne.Guid == e.Guid) == null);
+                if (EDeleted.Count() > 0) { SuUpdated = true; }
+                m_Settings.ReadSubscriptions = m_Settings.ReadSubscriptions.Except(EDeleted).ToArray();
+            }
+
+            if(theProperties.ReadSubscriptions != null)
+            {
+                List<Subscription> NewSubscriptionList = new List<Subscription>();
+                foreach( var ReadSubscription in theProperties.ReadSubscriptions)
                 {
-                    if( ReadSubscription.Id != ExistingReadSubscription.Id)
+                    Subscription ExistingReadSubscription = Array.Find(m_Settings.ReadSubscriptions, ne => ne.Guid == ReadSubscription.Guid);
+
+                    if( ExistingReadSubscription == null )
                     {
-                        ExistingReadSubscription.Id = ReadSubscription.Id;
+                        ReadSubscription.Guid = System.Guid.NewGuid().ToString();
+                        ReadSubscription.Event += OnReadSubscriptionEvent;
+                        NewSubscriptionList.Add(ReadSubscription);
                         SuUpdated = true;
                     }
+                    else
+                    {
+                        if( ReadSubscription.Id != ExistingReadSubscription.Id)
+                        {
+                            ExistingReadSubscription.Id = ReadSubscription.Id;
+                            SuUpdated = true;
+                        }
+                    }
                 }
-            }
 
-            if( NewSubscriptionList.Any() )
-            {
-                var NewSubscriptionArray = NewSubscriptionList.ToArray();
-                Subscription[] NewReadSubscriptions = new Subscription[m_Settings.ReadSubscriptions.Length + NewSubscriptionArray.Length];
-                Array.Copy(m_Settings.ReadSubscriptions, NewReadSubscriptions, m_Settings.ReadSubscriptions.Length);
-                Array.Copy(NewSubscriptionArray, 0, NewReadSubscriptions, m_Settings.ReadSubscriptions.Length, NewSubscriptionArray.Length);
-                m_Settings.ReadSubscriptions = NewReadSubscriptions;
+                if( NewSubscriptionList.Any() )
+                {
+                    var NewSubscriptionArray = NewSubscriptionList.ToArray();
+                    Subscription[] NewReadSubscriptions = new Subscription[m_Settings.ReadSubscriptions.Length + NewSubscriptionArray.Length];
+                    Array.Copy(m_Settings.ReadSubscriptions, NewReadSubscriptions, m_Settings.ReadSubscriptions.Length);
+                    Array.Copy(NewSubscriptionArray, 0, NewReadSubscriptions, m_Settings.ReadSubscriptions.Length, NewSubscriptionArray.Length);
+                    m_Settings.ReadSubscriptions = NewReadSubscriptions;
+                }
             }
 
             if (ReConfigure)
@@ -185,14 +171,14 @@ namespace MultiPlug.Ext.FileIO.Components.FileReader
                 ConfigureWatcher();
             }
 
-            if (SuUpdated && SubscriptionsUpdated != null)
+            if (SuUpdated)
             {
-                SubscriptionsUpdated(this, EventArgs.Empty);
+                SubscriptionsUpdated?.Invoke();
             }
 
-            if( EvUpdated && EventUpdated != null)
+            if(EvUpdated)
             {
-                EventUpdated(this, EventArgs.Empty);
+                EventUpdated?.Invoke();
             }
         }
 
@@ -215,10 +201,10 @@ namespace MultiPlug.Ext.FileIO.Components.FileReader
             FSW.Path = m_Settings.FilePath.Substring(0, idx) + "\\";
             FSW.Filter = m_Settings.FilePath.Substring(idx + 1);
 
-            if (m_Settings.nFLA) { FSW.NotifyFilter |= NotifyFilters.LastAccess; }
-            if (m_Settings.nFLW) { FSW.NotifyFilter |= NotifyFilters.LastWrite; }
-            if (m_Settings.nFFN) { FSW.NotifyFilter |= NotifyFilters.FileName; }
-            if (m_Settings.nFDN) { FSW.NotifyFilter |= NotifyFilters.DirectoryName; }
+            if (m_Settings.nFLA.Value) { FSW.NotifyFilter |= NotifyFilters.LastAccess; }
+            if (m_Settings.nFLW.Value) { FSW.NotifyFilter |= NotifyFilters.LastWrite; }
+            if (m_Settings.nFFN.Value) { FSW.NotifyFilter |= NotifyFilters.FileName; }
+            if (m_Settings.nFDN.Value) { FSW.NotifyFilter |= NotifyFilters.DirectoryName; }
         }
 
         public void Stop()
@@ -260,12 +246,8 @@ namespace MultiPlug.Ext.FileIO.Components.FileReader
 
                 if(m_Settings.UpdatePart == 0)
                 {
-                    var list = new List<Pair>(1);
-                    list.Add(new Pair( string.Copy(m_Settings.Subject), FileHandler.ReadFileContent(e.FullPath )));
-
                     m_LastWriteTime = lastWriteTime;
-
-                    m_EventHandlers.FireUpdate(new Payload (m_Settings.FileChanged.Id, list.ToArray() ) );
+                    m_Settings.FileChanged.Invoke( new Payload (m_Settings.FileChanged.Id, new PayloadSubject[] { new PayloadSubject(m_Settings.FileChanged.Subjects[0], FileHandler.ReadFileContent(e.FullPath)) } ) );
                 }
                 else if (m_Settings.UpdatePart == 1)
                 {
@@ -273,19 +255,12 @@ namespace MultiPlug.Ext.FileIO.Components.FileReader
 
                     foreach (var line in lines)
                     {
-                        var plist = new List<Pair>(1);
-                        plist.Add(new Pair(string.Copy(m_Settings.Subject), line ));
-
-                        m_EventHandlers.FireUpdate(new Payload( m_Settings.FileChanged.Id, plist.ToArray() ) );
+                        m_Settings.FileChanged.Invoke( new Payload( m_Settings.FileChanged.Id, new PayloadSubject[] { new PayloadSubject(m_Settings.FileChanged.Subjects[0], line) } ) );
                     }
                 }
                 else
                 {
-                    var list = new Pair[]
-                    {   new Pair( string.Copy(m_Settings.Subject), FileHandler.ReadFileContent(e.FullPath, m_Settings.UpdatePart))
-                    };
-
-                    m_EventHandlers.FireUpdate( new Payload( m_Settings.FileChanged.Id, list ) );
+                    m_Settings.FileChanged.Invoke( new Payload( m_Settings.FileChanged.Id, new PayloadSubject[] { new PayloadSubject(m_Settings.FileChanged.Subjects[0], FileHandler.ReadFileContent(e.FullPath, m_Settings.UpdatePart.Value)) } ) );
                 }
             }
         }
@@ -293,48 +268,6 @@ namespace MultiPlug.Ext.FileIO.Components.FileReader
         public string Read( int theLines )
         {
             return ( theLines == 0 ) ? FileHandler.ReadFileContent(m_Settings.FilePath) : FileHandler.ReadFileContent(m_Settings.FilePath, theLines);
-        }
-
-        class EventsHandler : EventableBase
-        {
-            private FileReaderSettings m_Settings;
-
-            public EventsHandler(FileReaderSettings theSettings)
-            {
-                this.m_Settings = theSettings;
-            }
-
-            public override Payload CachedValue()
-            {
-                throw new NotImplementedException();
-            }
-
-            public void FireUpdate(Payload theGroup)
-            {
-                Update?.Invoke(theGroup);
-            }
-        }
-
-        class SubscriptionsHandler : EventConsumer
-        {
-            private EventsHandler m_EventHandlers;
-            private FileReaderSettings m_Settings;
-
-            public SubscriptionsHandler(FileReaderSettings theSettings, EventsHandler theEventHandlers)
-            {
-                this.m_EventHandlers = theEventHandlers;
-                this.m_Settings = theSettings;
-            }
-
-            public override void OnEvent(Payload e)
-            {
-
-                var list = new Pair[]
-                { new Pair( string.Copy(m_Settings.Subject), FileHandler.ReadFileContent(m_Settings.FilePath, m_Settings.UpdatePart) )
-                };
-
-                m_EventHandlers.FireUpdate(new Payload( m_Settings.FileChanged.Id, list ));
-            }
         }
 
         class FileHandler

@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
 using MultiPlug.Base.Attribute;
 using MultiPlug.Base.Http;
+using MultiPlug.Ext.FileIO.Components.FileReader;
 
 namespace MultiPlug.Ext.FileIO.Controllers.Settings.Reader
 {
@@ -9,50 +11,25 @@ namespace MultiPlug.Ext.FileIO.Controllers.Settings.Reader
     {
         public Response Get(string Id)
         {
-       //     var dic = Context.QueryString.FirstOrDefault(q => q.Key == "id");
+            FileReaderComponent FileReader = null;
 
-            var FileReader = Core.Instance.FileReaders.Find(t => t.Settings.Guid == Id);
-
-            //if (FileReader == null)
-            //{
-            //    return new Response
-            //    {
-            //        StatusCode = System.Net.HttpStatusCode.NotFound
-            //    };
-            //}
-
+            if (! string.IsNullOrEmpty(Id))
+            {
+                FileReader = Core.Instance.FileReaders.Find(t => t.Settings.Guid == Id);
+            }
 
             var model = new Models.Settings.Path
             {
-                Guid = string.IsNullOrEmpty(Id) ? System.Guid.NewGuid().ToString(): Id,
-                FilePath = (FileReader == null) ? "C:\\" : FileReader.Settings.FilePath,
-                FilePathJsonEncoded = (FileReader == null) ? "C:\\\\" : FileReader.Settings.FilePath.Replace("\\", "\\\\")
-             //   BackButton = "reader/?id=" + dic.Valu
+                Guid = string.IsNullOrEmpty(Id) ? string.Empty: Id,
+                FilePath = (FileReader == null) ? Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory) : FileReader.Settings.FilePath,
+                FilePathJsonEncoded = (FileReader == null) ? Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory).Replace("\\", "\\\\") : FileReader.Settings.FilePath.Replace("\\", "\\\\"),
+                BackButton = string.IsNullOrEmpty(Id) ? string.Empty : "reader/?id=" + Id
             };
-
 
             return new Response
             {
                 Model = model,
                 Template = "GetReaderPathViewContents"
-            };
-        }
-
-        public Response Post(Models.Settings.Path theModel)
-        {
-            var FileReader = Core.Instance.FileReaders.Find(t => t.Settings.Guid == theModel.Guid);
-
-            FileReader.Apply(theModel);
-
-            var referrer = Context.Referrer.ToString();
-            referrer = referrer.Substring(0, referrer.LastIndexOf('/'));
-            referrer = referrer.Substring(0, referrer.LastIndexOf('/'));
-            referrer = referrer + "/?id=" + theModel.Guid;
-
-            return new Response
-            {
-                StatusCode = System.Net.HttpStatusCode.Redirect,
-                Location = new System.Uri(referrer)
             };
         }
     }

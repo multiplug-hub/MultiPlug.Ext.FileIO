@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>MultiPlug.Ext.FileIO</id>
-    <version>1.0.13</version>
+    <version>1.0.14</version>
     <title>File I/O Extension for the MultiPlug .Net Edge Computing Platform</title>
     <authors>MultiPlugHub</authors>
     <owners>MultiPlugHub</owners>
@@ -16,6 +16,7 @@
 * Monitor file changes and read complete or partial files lines, on change or event subscription.
 
 Change Log:
+1.0.14 User Interface tidyup, Code refactor and Write Separators
 1.0.13 Upgrade for MultiPlug.Core 2.2.81
 1.0.12 Upgrade for MultiPlug.Core 2.2.68
 1.0.10 Refector: Rename project from files to fileio

@@ -1,108 +1,74 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 using MultiPlug.Base.Attribute;
 using MultiPlug.Base.Exchange;
 using MultiPlug.Base.Http;
 using MultiPlug.Ext.FileIO.Models;
 using MultiPlug.Ext.FileIO.Components.FileWriter;
+using MultiPlug.Ext.FileIO.Models.Settings;
 
 namespace MultiPlug.Ext.FileIO.Controllers.Settings.Writer
 {
     [Route("writer")]
     public class WriterController : SettingsApp
     {
-        public Response Get()
+        public Response Get(WriterGet theModel)
         {
             FileWriterComponent writer = null;
 
-            var dic = Context.QueryString.FirstOrDefault(q => q.Key == "id");
-
-            if (!dic.Equals(new KeyValuePair<string, string>()))
+            if (!string.IsNullOrEmpty(theModel.Id))
             {
-                writer = Core.Instance.FileWriters.Find(t => t.Settings.Guid == dic.Value);
+                writer = Core.Instance.FileWriters.Find(FileWriter => FileWriter.Settings.Guid == theModel.Id);
             }
 
-            FileWriterSettings model;
+            FileWriterSettings ResponseModel;
 
             if (writer != null)
             {
-                model = writer.Settings;
+                ResponseModel = writer.Settings;
             }
             else
             {
-                model = new FileWriterSettings
-                {
-                    Guid = Guid.NewGuid().ToString(),
-                    WriteSubscriptions = new List<Subscription>(),
-                    FilePath = "C:\\",
-                    GroupSelectKey = "value"
-                };
+                ResponseModel = new FileWriterComponent(Guid.NewGuid().ToString()).Settings;
+            }
 
-                Core.Instance.Update(new FileWriterSettings[] { model });
+            if (!string.IsNullOrEmpty(theModel.Path))
+            {
+                ResponseModel.FilePath = theModel.Path;
             }
 
             return new Response
             {
-                Model = model,
+                Model = ResponseModel,
                 Template = "GetWriterViewContents"
             };
         }
 
-        public Response Post()
+        public Response Post(WriterPost theModel)
         {
-            var form = Context.FormData;
+            Subscription[] Subscriptions = new Subscription[0];
 
-            var SquareBracketsPattern = @"\[(.*?)\]";
-            var SquareBracketsMatchCollection = new List<KeyValuePair<MatchCollection, string>>();
-
-            foreach (var item in form)
+            if (theModel.SubscriptionGuid != null && theModel.SubscriptionId != null && theModel.SubscriptionGuid.Length == theModel.SubscriptionId.Length)
             {
-                var matches = Regex.Matches(item.Key, SquareBracketsPattern);
-
-                if (matches.Count > 0)
+                Subscriptions = new Subscription[theModel.SubscriptionGuid.Length];
+                for (int i = 0; i < theModel.SubscriptionGuid.Length; i++)
                 {
-                    SquareBracketsMatchCollection.Add(new KeyValuePair<MatchCollection, string>(matches, item.Value));
+                    Subscriptions[i] = new Subscription(theModel.SubscriptionGuid[i], theModel.SubscriptionId[i]);
                 }
             }
 
-            var EventGuid = SquareBracketsMatchCollection.Find(m => m.Key[1].Groups[1].Value == "guid");
-            var FileAction = SquareBracketsMatchCollection.Find(m => m.Key[1].Groups[1].Value == "fileaction");
-            var SelectKey = SquareBracketsMatchCollection.Find(m => m.Key[1].Groups[1].Value == "groupselectkey");
-
-            if (!EventGuid.Equals(default(KeyValuePair<MatchCollection, string>)))
+            Core.Instance.Update(new FileWriterSettings[] { new FileWriterSettings
             {
-                Core.Instance.Update(new FileWriterSettings[] { new FileWriterSettings
-                {
-                    WriteSubscriptions = PopulateSubscriptions(SquareBracketsMatchCollection),
-                    Guid = EventGuid.Value,
-                    FilePath = null,
-                    Append = FileAction.Value == "append" ? true : false,
-                    GroupSelectKey = SelectKey.Value,
-                    WriteLine = PopulateCheckbox(SquareBracketsMatchCollection, "writeline"),
-                } });
-                return new Response { Location = new Uri(Context.Referrer, "?id=" + EventGuid.Value), StatusCode = System.Net.HttpStatusCode.Moved };
-            }
-            else
-            {
-                return new Response { Location = Context.Referrer, StatusCode = System.Net.HttpStatusCode.Moved };
-            }
-        }
-
-        private bool PopulateCheckbox(List<KeyValuePair<MatchCollection, string>> theForm, string CheckBoxId)
-        {
-            var Value = theForm.Find(m => m.Key[1].Groups[1].Value == CheckBoxId);
-
-            return (Value.Equals(default(KeyValuePair<MatchCollection, string>))) ? false : true;
-        }
-
-        private List<Subscription> PopulateSubscriptions(List<KeyValuePair<MatchCollection, string>> theForm)
-        {
-            var Starts = theForm.FindAll(m => m.Key[1].Groups[1].Value == "subid");
-
-            return (Starts != null) ? Starts.Select(d => new Subscription { Guid = d.Key[2].Groups[1].Value, Id = d.Value }).ToList() : new List<Subscription>();
+                WriteSubscriptions = Subscriptions,
+                Guid = theModel.Guid,
+                FilePath = theModel.FilePath,
+                Append = theModel.Append,
+                WriteLine = theModel.Writeline,
+                WritePrefix = theModel.WritePrefix,
+                WriteSeparator = theModel.WriteSeparator,
+                WriteSuffix = theModel.WriteSuffix
+            } });
+            return new Response { Location = new Uri(Context.Referrer, "?id=" + theModel.Guid), StatusCode = System.Net.HttpStatusCode.Moved };
         }
     }
 }

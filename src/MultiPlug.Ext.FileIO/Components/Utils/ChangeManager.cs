@@ -7,19 +7,19 @@ namespace MultiPlug.Ext.FileIO.Components.Utils
 {
     public class ChangeManager : MultiPlugBase
     {
-        public event EventHandler EventsUpdated;
-        public event EventHandler SubscriptionsUpdated;
+        public event Action EventsUpdated;
+        public event Action SubscriptionsUpdated;
 
         private bool m_Enabled = true;
         private bool m_SubscriptionsUpdatesBuffered = false;
         private bool m_EventsUpdatesBuffered = false;
 
-        public void Changes_SubscriptionsUpdated(object sender, EventArgs e)
+        public void Changes_SubscriptionsUpdated()
         {
             if (m_Enabled)
             {
                 if (SubscriptionsUpdated != null)
-                    SubscriptionsUpdated(this, EventArgs.Empty);
+                    SubscriptionsUpdated();
             }
             else
             {
@@ -27,12 +27,12 @@ namespace MultiPlug.Ext.FileIO.Components.Utils
             }
         }
 
-        public void Changes_EventsUpdated(object sender, EventArgs e)
+        public void Changes_EventsUpdated()
         {
             if (m_Enabled)
             {
                 if (EventsUpdated != null)
-                    EventsUpdated(this, EventArgs.Empty);
+                    EventsUpdated();
             }
             else
             {
@@ -47,13 +47,13 @@ namespace MultiPlug.Ext.FileIO.Components.Utils
             if (m_Enabled && m_SubscriptionsUpdatesBuffered)
             {
                 m_SubscriptionsUpdatesBuffered = false;
-                Changes_SubscriptionsUpdated(this, EventArgs.Empty);
+                Changes_SubscriptionsUpdated();
             }
 
             if (m_Enabled && m_EventsUpdatesBuffered)
             {
                 m_EventsUpdatesBuffered = false;
-                Changes_EventsUpdated(this, EventArgs.Empty);
+                Changes_EventsUpdated();
             }
         }
 
@@ -71,7 +71,7 @@ namespace MultiPlug.Ext.FileIO.Components.Utils
         public void Remove(FileWriterComponent theWriter)
         {
             theWriter.SubscriptionsUpdated -= Changes_SubscriptionsUpdated;
-            Changes_SubscriptionsUpdated(this, EventArgs.Empty);
+            Changes_SubscriptionsUpdated();
         }
 
         public void Add(FileReaderComponent theReader)
@@ -91,7 +91,7 @@ namespace MultiPlug.Ext.FileIO.Components.Utils
             theReader.EventUpdated -= Changes_EventsUpdated;
             theReader.SubscriptionsUpdated -= Changes_SubscriptionsUpdated;
 
-            Changes_EventsUpdated(this, EventArgs.Empty);
+            Changes_EventsUpdated();
         }
     }
 }

@@ -1,57 +1,35 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
 using MultiPlug.Base.Attribute;
 using MultiPlug.Base.Http;
+using MultiPlug.Ext.FileIO.Components.FileWriter;
 
 namespace MultiPlug.Ext.FileIO.Controllers.Settings.Writer
 {
     [Route("writer/path")]
     public class WriterPathController : SettingsApp
     {
-        public Response Get()
+        public Response Get(string Id)
         {
-            var dic = Context.QueryString.FirstOrDefault(q => q.Key == "id");
+            FileWriterComponent FileWriter = null;
 
-            var FileWriter = Core.Instance.FileWriters.Find(t => t.Settings.Guid == dic.Value);
-
-            if (FileWriter == null)
+            if (!string.IsNullOrEmpty(Id))
             {
-                return new Response
-                {
-                    StatusCode = System.Net.HttpStatusCode.NotFound
-                };
+                FileWriter = Core.Instance.FileWriters.Find(t => t.Settings.Guid == Id);
             }
 
             var model = new Models.Settings.Path
             {
-                Guid = dic.Value,
-                FilePath = FileWriter.Settings.FilePath,
-                FilePathJsonEncoded = FileWriter.Settings.FilePath.Replace("\\", "\\\\"),
-                BackButton = "writer/?id=" + dic.Value
+                Guid = string.IsNullOrEmpty(Id) ? string.Empty : Id,
+                FilePath = (FileWriter == null) ? Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory) : FileWriter.Settings.FilePath,
+                FilePathJsonEncoded = (FileWriter == null) ? Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory).Replace("\\", "\\\\") : FileWriter.Settings.FilePath.Replace("\\", "\\\\"),
+                BackButton = string.IsNullOrEmpty(Id) ? string.Empty : "writer/?id=" + Id
             };
-
 
             return new Response
             {
                 Model = model,
                 Template = "GetWriterPathViewContents"
-            };
-        }
-
-        public Response Post(Models.Settings.Path theModel)
-        {
-            var FileWriter = Core.Instance.FileWriters.Find(t => t.Settings.Guid == theModel.Guid);
-
-            FileWriter.Apply(theModel);
-
-            var referrer = Context.Referrer.ToString();
-            referrer = referrer.Substring(0, referrer.LastIndexOf('/'));
-            referrer = referrer.Substring(0, referrer.LastIndexOf('/'));
-            referrer = referrer + "/?id=" + theModel.Guid;
-
-            return new Response
-            {
-                StatusCode = System.Net.HttpStatusCode.Redirect,
-                Location = new System.Uri(referrer)
             };
         }
     }

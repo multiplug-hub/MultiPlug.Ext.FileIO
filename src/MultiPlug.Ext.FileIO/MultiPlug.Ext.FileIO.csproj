@@ -82,6 +82,8 @@
     <Compile Include="Models\Settings\Path.cs" />
     <Compile Include="Models\Settings\ReaderGet.cs" />
     <Compile Include="Models\Settings\ReaderPost.cs" />
+    <Compile Include="Models\Settings\WriterGet.cs" />
+    <Compile Include="Models\Settings\WriterPost.cs" />
     <Compile Include="Models\ViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -108,6 +110,10 @@
     <Content Include="Controllers\Assets\file.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

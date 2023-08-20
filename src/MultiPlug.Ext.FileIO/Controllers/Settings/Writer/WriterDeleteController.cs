@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-
 using MultiPlug.Base.Attribute;
 using MultiPlug.Base.Http;
 
@@ -8,16 +7,20 @@ namespace MultiPlug.Ext.FileIO.Controllers.Settings.Writer
     [Route("writer/delete")]
     public class WriterDeleteController : SettingsApp
     {
-        public Response Get()
+        public Response Get(string id)
         {
-            var dic = Context.QueryString.First(q => q.Key == "id");
+            if (!string.IsNullOrEmpty(id))
+            {
+                var FileWriter = Core.Instance.FileWriters.FirstOrDefault(t => t.Settings.Guid == id);
 
-            var writer = Core.Instance.FileWriters.Find(t => t.Settings.Guid == dic.Value);
-
-            Core.Instance.Changes.EnabledUpdates(false);
-            Core.Instance.Changes.Remove(writer);
-            Core.Instance.FileWriters.Remove(writer);
-            Core.Instance.Changes.EnabledUpdates(true);
+                if(FileWriter != null)
+                {
+                    Core.Instance.Changes.EnabledUpdates(false);
+                    Core.Instance.Changes.Remove(FileWriter);
+                    Core.Instance.FileWriters.Remove(FileWriter);
+                    Core.Instance.Changes.EnabledUpdates(true);
+                }
+            }
 
             return new Response
             {
